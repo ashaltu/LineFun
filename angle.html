@@ -1,0 +1,146 @@
+<canvas id="ctx" width="500" height="500"></canvas>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+</style>
+
+<script>
+    //style = "border:1px solid #000000;"
+    var ctx = document.getElementById("ctx").getContext("2d");
+    var unitLength = 20;
+    document.onmousemove = function (mouse) {
+        
+        var mouseX = mouse.clientX;
+        var mouseY = mouse.clientY;
+        if(mouseX>500){
+            mouseX = 500;
+        }else if(mouseX<0){
+            mouseX=0;
+        }
+        if(mouseY>500){
+            mouseY = 500;
+        }else if(mouseY<0){
+            mouseY=0;
+        }
+        //clears canvas and draws a background that doesnt change
+        drawBackground();
+        //displays what quadrant the line currently is in
+        
+       displayQuadrant(findQuadrantRelativeTo(245,245,mouseX,mouseY));
+       //draws line from middle to wherever the mouse is
+        drawLine(245,245,mouseX,mouseY);
+        //creates angle arc the matches with the line created and returns correct angle based on quadrant
+        var angle = drawArc(245,245,mouseX,mouseY);
+        if(angle==360){
+            ctx.fillText("Angle: 0 or "+angle,20,60);
+        }else{
+        ctx.fillText("Angle: "+angle.toFixed(3),20,60);
+        }
+        //displays the length of the the line
+        var length = distanceBetweenPoints(245,245,mouseX,mouseY)/unitLength;
+        ctx.fillText("Line Length: "+length.toFixed(3),20,75)
+    }
+
+    function drawBackground(){
+        ctx.clearRect(0, 0, window.outerWidth, window.outerHeight);
+        //draw line to right
+        ctx.fillText("1 Unit Length:",20,35);
+        drawLine(245,245,500,245);
+        drawLine(20,45,20+unitLength,45);
+    }
+
+    function drawLine(initialX,initialY,finalX,finalY){
+        ctx.beginPath();
+        ctx.moveTo(initialX, initialY);
+        ctx.lineTo(finalX, finalY);
+        ctx.stroke();
+        ctx.closePath();
+    }
+
+    function drawArc(baseX,baseY,mouseX,mouseY){
+        ctx.beginPath();
+        var difY = mouseY-baseY;
+        var difX = mouseX-baseX;
+        var angle = Math.atan(difY/difX);
+        var returnAngle;
+        switch(findQuadrantRelativeTo(baseX,baseY,mouseX,mouseY)){
+            case 1:
+            ctx.arc(baseX,baseY,40,0,angle,true);
+            returnAngle= -angle;
+            break;
+            case 1.5:
+            ctx.arc(baseX,baseY,40,0,Math.PI/2,true);
+            returnAngle= Math.PI*3/2;
+            break;
+            case 2:
+            ctx.arc(baseX,baseY,40,0,angle-Math.PI,true);
+            returnAngle= Math.PI-angle;
+            break;
+            case 2.5:
+            ctx.arc(baseX,baseY,40,0,Math.PI,true);
+            returnAngle= Math.PI;
+            break;
+            case 3:
+            ctx.arc(baseX,baseY,40,0,angle+Math.PI,true);
+            returnAngle= Math.PI-angle;
+            break;
+            case 3.5:
+            ctx.arc(baseX,baseY,40,0,Math.PI*3/2,true);
+            returnAngle= Math.PI/2;
+            break;
+            case 4:
+            ctx.arc(baseX,baseY,40,0,angle,true);
+            returnAngle= Math.PI*2-angle;
+            break;
+            case 4.5:
+            ctx.arc(baseX,baseY,40,0,Math.PI*2,true);
+            returnAngle= Math.PI*2;
+            break;
+        }
+        ctx.stroke();
+
+        return (returnAngle*180/Math.PI);
+    }
+
+    function findQuadrantRelativeTo(baseX,baseY,x,y){
+        if(x>baseX && y>baseY){
+            return 4;
+        }
+        if(x<baseX && y>baseY){
+            return 3;
+        }
+        if(x<baseX && y<baseY){
+            return 2;
+        }
+        if(x>baseX && y<baseY){
+            return 1;
+        }
+
+        if(x>baseX && y==baseY){
+            return 4.5;
+        }
+        if(x==baseX && y<baseY){
+            return 3.5;
+        }
+        if(x<baseX && y==baseY){
+            return 2.5;
+        }
+        if(x==baseX && y>baseY){
+            return 1.5;
+        }
+    }
+
+    function displayQuadrant(quadrant){
+        if(quadrant== 1 || quadrant== 2 || quadrant== 3 || quadrant==4){
+            ctx.fillText("Quadrant: "+ quadrant,20,20);
+        }else{
+            ctx.fillText("Quadrant: undefined",20,20);
+        }
+    }
+
+    function distanceBetweenPoints(initialX,initialY,finalX,finalY){
+       return Math.hypot(finalX-initialX,finalY-initialY);
+    }
+</script>
